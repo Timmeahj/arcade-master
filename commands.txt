@@ -1,0 +1,4 @@
+npx tsc -p ./                                       webpack typescript compile
+node server                                         start node server
+npx webpack --config webpack.config.js              update webpack config
+
