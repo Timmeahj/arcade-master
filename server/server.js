@@ -13,9 +13,10 @@ const port = process.env.PORT || 8080;
 const io = socketIO(server);
 
 let rooms = [];
+let takenRooms = [];
 // UUID
 for (let i = 1000; i <= 9999; i++){
-    rooms.push(i);
+    rooms.push(i.toString());
 }
 shuffle(rooms);
 
@@ -28,17 +29,38 @@ io.on('connection', (sock) => {
 
     sock.on('createRoom', () => {
         let roomNumber = rooms.shift();
+        takenRooms.push(roomNumber);
         sock.join(roomNumber);
         sock.emit('getRoomNumber', roomNumber);
         console.log('room created: '+roomNumber);
     });
 
     sock.on('joinRoom', (roomNumber) => {
-        sock.join(roomNumber);
-        sock.emit('getRoomNumber', roomNumber);
-        console.log('room joined: '+roomNumber);
+        if(rooms.includes(roomNumber)){
+            sock.emit('invalidRoomNumber');
+        } else{
+            sock.join(roomNumber);
+            sock.emit('getRoomNumber', roomNumber);
+            console.log('room joined: '+roomNumber);
+        }
+    });
+
+    //TODO refactor
+    sock.on('disconnect', () =>{
+        console.log(takenRooms);
+        if(takenRooms.length > 0){
+            console.log(io.sockets.adapter.rooms[takenRooms[0]]);
+            for (let i = 0; i < takenRooms.length; i++){
+                if(!io.sockets.adapter.rooms[takenRooms[i]]){
+                    rooms.push(takenRooms[i]);
+                    console.log('room empty and destroyed: '+takenRooms[i]);
+                }
+            }
+        }
     });
 });
+
+
 
 server.on('error', (err) => {
     console.log("error: "+err)

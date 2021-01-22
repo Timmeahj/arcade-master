@@ -7,32 +7,30 @@ const renderLoc = <HTMLDivElement>document.getElementById("render");
 const menuRenderer = new Renderer(game.menu.view , renderLoc);
 
 menuRenderer.render().then(function (){
-    document.getElementById('username')!.innerText = game.clientPlayer.username;
-    document.getElementById('createGame')!.addEventListener('click', function (){
+    (<HTMLDivElement>document.getElementById('username')).innerText = game.clientPlayer.username;
+    (<HTMLButtonElement>document.getElementById('createGame')).addEventListener('click', function (){
         game.createRoom();
-        setTimeout(function (){
-            let arcadeRenderer = new Renderer(game.arcade.view , renderLoc);
-            arcadeRenderer.render().then(function (){
-                (<HTMLDivElement>document.getElementById('roomNumber')).innerText = game.arcade.roomNumber.toString();
-            });
-        }, 1000);
     });
-    document.getElementById('joinGame')!.addEventListener('click', function (){
+    (<HTMLButtonElement>document.getElementById('joinGame')).addEventListener('click', function (){
         let number = (<HTMLInputElement>document.getElementById('roomCodeInput')).value;
         game.joinRoom(number);
-        setTimeout(function (){
-            let arcadeRenderer = new Renderer(game.arcade.view , renderLoc);
-            arcadeRenderer.render().then(function (){
-                (<HTMLDivElement>document.getElementById('roomNumber')).innerText = game.arcade.roomNumber.toString();
-            });
-        }, 1000);
     });
 });
 
 game.clientPlayer.socket.on('getRoomNumber', (roomNumber: string) => {
     game.arcade = new Arcade(roomNumber);
+    let arcadeRenderer = new Renderer(game.arcade.view , renderLoc);
+    arcadeRenderer.render().then(function (){
+        (<HTMLDivElement>document.getElementById('roomNumber')).innerText = game.arcade.roomNumber.toString();
+    });
     console.log(roomNumber);
 });
+
+game.clientPlayer.socket.on('invalidRoomNumber', () => {
+    //TODO refactor
+    window.alert('Invalid room number');
+});
+
 
 
 
