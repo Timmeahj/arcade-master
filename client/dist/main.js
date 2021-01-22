@@ -26,7 +26,7 @@ eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export */ __webpac
   \*****************************/
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
-eval("__webpack_require__.r(__webpack_exports__);\n/* harmony import */ var _renderer_Renderer_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./renderer/Renderer.js */ \"./client/src/renderer/Renderer.js\");\n/* harmony import */ var _models_Game__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./models/Game */ \"./client/src/models/Game.ts\");\n\r\n\r\nconst game = new _models_Game__WEBPACK_IMPORTED_MODULE_1__.Game();\r\nconst renderer = new _renderer_Renderer_js__WEBPACK_IMPORTED_MODULE_0__.Renderer(game.menu.view, document.body);\r\nrenderer.render().then();\r\n\n\n//# sourceURL=webpack://server/./client/src/index.ts?");
+eval("__webpack_require__.r(__webpack_exports__);\n/* harmony import */ var _renderer_Renderer_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./renderer/Renderer.js */ \"./client/src/renderer/Renderer.js\");\n/* harmony import */ var _models_Game__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./models/Game */ \"./client/src/models/Game.ts\");\n\r\n\r\nconst game = new _models_Game__WEBPACK_IMPORTED_MODULE_1__.Game();\r\nconst renderer = new _renderer_Renderer_js__WEBPACK_IMPORTED_MODULE_0__.Renderer(game.menu.view, document.body);\r\nrenderer.render().then(function () {\r\n    document.getElementById('username').innerText = game.clientPlayer.username;\r\n});\r\n\n\n//# sourceURL=webpack://server/./client/src/index.ts?");
 
 /***/ }),
 
@@ -46,7 +46,7 @@ eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export */ __webpac
   \***********************************/
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
-eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export */ __webpack_require__.d(__webpack_exports__, {\n/* harmony export */   \"Game\": () => /* binding */ Game\n/* harmony export */ });\n/* harmony import */ var _Menu__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./Menu */ \"./client/src/models/Menu.ts\");\n/* harmony import */ var _Arcade__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./Arcade */ \"./client/src/models/Arcade.ts\");\n\r\n\r\nclass Game {\r\n    constructor() {\r\n        this._menu = new _Menu__WEBPACK_IMPORTED_MODULE_0__.Menu();\r\n        this._arcade = new _Arcade__WEBPACK_IMPORTED_MODULE_1__.Arcade();\r\n    }\r\n    get menu() {\r\n        return this._menu;\r\n    }\r\n    get arcade() {\r\n        return this._arcade;\r\n    }\r\n}\r\n\n\n//# sourceURL=webpack://server/./client/src/models/Game.ts?");
+eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export */ __webpack_require__.d(__webpack_exports__, {\n/* harmony export */   \"Game\": () => /* binding */ Game\n/* harmony export */ });\n/* harmony import */ var _Menu__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./Menu */ \"./client/src/models/Menu.ts\");\n/* harmony import */ var _Arcade__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./Arcade */ \"./client/src/models/Arcade.ts\");\n/* harmony import */ var _Player__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./Player */ \"./client/src/models/Player.ts\");\n\r\n\r\n\r\nclass Game {\r\n    constructor() {\r\n        this._menu = new _Menu__WEBPACK_IMPORTED_MODULE_0__.Menu();\r\n        this._arcade = new _Arcade__WEBPACK_IMPORTED_MODULE_1__.Arcade();\r\n        this._clientPlayer = new _Player__WEBPACK_IMPORTED_MODULE_2__.Player(Game.randomUsername());\r\n    }\r\n    get menu() {\r\n        return this._menu;\r\n    }\r\n    get arcade() {\r\n        return this._arcade;\r\n    }\r\n    get clientPlayer() {\r\n        return this._clientPlayer;\r\n    }\r\n    static randomUsername() {\r\n        const a = [\"Small\", \"Big\", \"Super\", \"Evil\", \"Unamused\", \"Fat\", \"Depressed\", \"Smart\", \"The\"];\r\n        const b = [\"Hecking\", \"Yellow\", \"Black\", \"White\", \"Woke\", \"Daddy\"];\r\n        const c = [\"Helicopter\", \"Doggo\", \"Banana\", \"Floofer\", \"Snowflake\", \"Boomer\", \"Pikachu\", \"Homie\", \"Gnome\", \"Rapper\", \"Sausage\"];\r\n        const rA = Math.floor(Math.random() * a.length);\r\n        const rB = Math.floor(Math.random() * b.length);\r\n        const rC = Math.floor(Math.random() * c.length);\r\n        return a[rA] + \" \" + b[rB] + \" \" + c[rC];\r\n    }\r\n}\r\n\n\n//# sourceURL=webpack://server/./client/src/models/Game.ts?");
 
 /***/ }),
 
@@ -57,6 +57,16 @@ eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export */ __webpac
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
 eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export */ __webpack_require__.d(__webpack_exports__, {\n/* harmony export */   \"Menu\": () => /* binding */ Menu\n/* harmony export */ });\nclass Menu {\r\n    constructor() {\r\n        this._view = 'menu.html';\r\n    }\r\n    get view() {\r\n        return this._view;\r\n    }\r\n}\r\n\n\n//# sourceURL=webpack://server/./client/src/models/Menu.ts?");
+
+/***/ }),
+
+/***/ "./client/src/models/Player.ts":
+/*!*************************************!*\
+  !*** ./client/src/models/Player.ts ***!
+  \*************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export */ __webpack_require__.d(__webpack_exports__, {\n/* harmony export */   \"Player\": () => /* binding */ Player\n/* harmony export */ });\n//const io = require('socket.io');\r\nclass Player {\r\n    constructor(_username) {\r\n        this._socket = io.connect();\r\n        this._username = _username;\r\n        console.log(this._socket);\r\n    }\r\n    set username(username) {\r\n        this._username = username;\r\n    }\r\n}\r\n\n\n//# sourceURL=webpack://server/./client/src/models/Player.ts?");
 
 /***/ })
 

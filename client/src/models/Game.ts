@@ -12,7 +12,6 @@ export class Game{
        this._menu = new Menu();
        this._arcade = new Arcade();
        this._clientPlayer = new Player(Game.randomUsername());
-       window.alert(this._clientPlayer);
     }
 
     get menu(): Menu{

@@ -1,4 +1,4 @@
-const io = require('socket.io');
+//const io = require('socket.io');
 
 export class Player{
     private _socket = io.connect();
