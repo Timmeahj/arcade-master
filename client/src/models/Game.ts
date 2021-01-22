@@ -34,6 +34,7 @@ export class Game{
         const rA = Math.floor(Math.random()*a.length);
         const rB = Math.floor(Math.random()*b.length);
         const rC = Math.floor(Math.random()*c.length);
-        return a[rA] +" "+ b[rB] +" "+ c[rC];
+        let username = a[rA] +" "+ b[rB] +" "+ c[rC];
+        return username.toString();
     }
 }

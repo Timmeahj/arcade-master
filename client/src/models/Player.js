@@ -1,11 +1,16 @@
-//const io = require('socket.io');
 export class Player {
-    constructor(_username) {
+    constructor(username) {
+        // @ts-ignore
         this._socket = io.connect();
-        this._username = _username;
-        console.log(this._socket);
+        this._username = username;
+    }
+    get socket() {
+        return this._socket;
     }
     set username(username) {
         this._username = username;
+    }
+    get username() {
+        return this._username;
     }
 }
