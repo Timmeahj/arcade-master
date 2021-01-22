@@ -4,7 +4,6 @@ import { Player } from "./Player";
 export class Game {
     constructor() {
         this._menu = new Menu();
-        this._arcade = new Arcade();
         this._clientPlayer = new Player(Game.randomUsername());
     }
     get menu() {
@@ -13,8 +12,18 @@ export class Game {
     get arcade() {
         return this._arcade;
     }
+    set arcade(arcade) {
+        this._arcade = arcade;
+    }
     get clientPlayer() {
         return this._clientPlayer;
+    }
+    createRoom() {
+        this._clientPlayer.socket.emit('createRoom');
+    }
+    joinRoom(roomNumber) {
+        this._clientPlayer.socket.emit('joinRoom', roomNumber);
+        this._arcade = new Arcade(roomNumber.toString());
     }
     static randomUsername() {
         const a = ["Small", "Big", "Super", "Evil", "Unamused", "Fat", "Depressed", "Smart", "The"];

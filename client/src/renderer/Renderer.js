@@ -20,6 +20,9 @@ export class Renderer {
             })
                 .then(Renderer.htmlToDom)
                 .then((view) => {
+                while (this.location.firstChild) {
+                    this.location.removeChild(this.location.firstChild);
+                }
                 this.location.appendChild(view);
             });
         });

@@ -5,12 +5,11 @@ import {Player} from "./Player";
 export class Game{
 
     private readonly _menu: Menu;
-    private readonly _arcade: Arcade;
+    private _arcade: Arcade | undefined;
     private readonly _clientPlayer: Player;
 
     constructor() {
        this._menu = new Menu();
-       this._arcade = new Arcade();
        this._clientPlayer = new Player(Game.randomUsername());
     }
 
@@ -19,11 +18,24 @@ export class Game{
     }
 
     get arcade(): Arcade{
-        return this._arcade;
+        return <Arcade>this._arcade;
+    }
+
+    set arcade(arcade: Arcade){
+        this._arcade = arcade;
     }
 
     get clientPlayer(): Player{
         return this._clientPlayer;
+    }
+
+    public createRoom(): void{
+        this._clientPlayer.socket.emit('createRoom');
+    }
+
+    public joinRoom(roomNumber: string): void{
+        this._clientPlayer.socket.emit('joinRoom', roomNumber);
+        this._arcade = new Arcade(roomNumber.toString());
     }
 
     private static randomUsername(){

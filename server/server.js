@@ -13,6 +13,7 @@ const port = process.env.PORT || 8080;
 const io = socketIO(server);
 
 let rooms = [];
+// UUID
 for (let i = 1000; i <= 9999; i++){
     rooms.push(i);
 }
@@ -26,14 +27,16 @@ io.on('connection', (sock) => {
     });
 
     sock.on('createRoom', () => {
-        const roomNumber = rooms.shift();
+        let roomNumber = rooms.shift();
         sock.join(roomNumber);
         sock.emit('getRoomNumber', roomNumber);
+        console.log('room created: '+roomNumber);
     });
 
     sock.on('joinRoom', (roomNumber) => {
         sock.join(roomNumber);
         sock.emit('getRoomNumber', roomNumber);
+        console.log('room joined: '+roomNumber);
     });
 });
 
