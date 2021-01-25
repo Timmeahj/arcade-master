@@ -4,7 +4,7 @@ import { Player } from "./Player";
 export class Game {
     constructor() {
         this._menu = new Menu();
-        this._clientPlayer = new Player(Game.randomUsername());
+        this._clientPlayer = new Player(Game.randomUsername(), true, 0, 0, Date.now());
     }
     get menu() {
         return this._menu;

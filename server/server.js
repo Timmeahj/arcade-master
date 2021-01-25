@@ -14,19 +14,16 @@ const io = socketIO(server);
 
 let rooms = [];
 let takenRooms = [];
-// UUID
+// TODO UUID
 for (let i = 1000; i <= 9999; i++){
     rooms.push(i.toString());
 }
 shuffle(rooms);
 
+let playerSpeed = 5;
+
 
 io.on('connection', (sock) => {
-    sock.on('doThing', (parameter) => {
-        io.emit('giveBackToAll', parameter);
-        sock.emit('giveBackToSock', parameter);
-    });
-
     sock.on('createRoom', () => {
         let roomNumber = rooms.shift();
         takenRooms.push(roomNumber);
@@ -49,7 +46,6 @@ io.on('connection', (sock) => {
     sock.on('disconnect', () =>{
         console.log(takenRooms);
         if(takenRooms.length > 0){
-            console.log(io.sockets.adapter.rooms[takenRooms[0]]);
             for (let i = 0; i < takenRooms.length; i++){
                 if(!io.sockets.adapter.rooms[takenRooms[i]]){
                     rooms.push(takenRooms[i]);
@@ -57,6 +53,42 @@ io.on('connection', (sock) => {
                 }
             }
         }
+    });
+
+    sock.on('menuRendered', () =>{
+       sock.emit('addMenuListeners');
+    });
+
+    sock.on('arcadeRendered', (data) =>{
+        console.log(data.roomNumber, data.player);
+        io.to(data.roomNumber).emit("spawnPlayer", (data.player));
+        sock.emit('startRender');
+    });
+
+    sock.on('move', (data) =>{
+        let arcadeX = data.arcadeX;
+        let x = data.x;
+        let arcadeY = data.arcadeY;
+        let y = data.y;
+
+        if(data.direction === "left"){
+            arcadeX += playerSpeed;
+            x -= playerSpeed;
+        }
+        if(data.direction === "down"){
+            arcadeY -= playerSpeed;
+            y += playerSpeed;
+        }
+        if(data.direction === "right"){
+            arcadeX -= playerSpeed;
+            x += playerSpeed;
+        }
+        if(data.direction === "up"){
+            arcadeY += playerSpeed;
+            y -= playerSpeed;
+        }
+
+        io.to(data.roomNumber).emit("updateLocation", ({x: x, arcadeX: arcadeX, y: y, arcadeY: arcadeY, id: data.id}));
     });
 });
 
