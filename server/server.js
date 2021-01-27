@@ -16,7 +16,7 @@ let rooms = [];
 let takenRooms = [];
 // TODO UUID
 for (let i = 1000; i <= 9999; i++){
-    rooms.push(i.toString());
+    rooms.push({'roomNumber': i.toString(), 'connected': []});
 }
 shuffle(rooms);
 
@@ -24,30 +24,46 @@ let playerSpeed = 5;
 
 
 io.on('connection', (sock) => {
-    sock.on('createRoom', () => {
-        let roomNumber = rooms.shift();
-        takenRooms.push(roomNumber);
-        sock.join(roomNumber);
-        sock.emit('getRoomNumber', roomNumber);
-        console.log('room created: '+roomNumber);
+    sock.on('createRoom', (player) => {
+        let takenRoom = rooms.shift();
+        takenRooms.push(takenRoom);
+        takenRoom.connected.push(player);
+        sock.join(takenRoom.roomNumber);
+        sock.emit('getRoomNumber', takenRoom.roomNumber);
+        console.log('room created: '+takenRoom.roomNumber);
     });
 
-    sock.on('joinRoom', (roomNumber) => {
-        if(rooms.includes(roomNumber)){
+    sock.on('joinRoom', (data) => {
+        if(rooms.includes(data.roomNumber)){
             sock.emit('invalidRoomNumber');
         } else{
-            sock.join(roomNumber);
-            sock.emit('getRoomNumber', roomNumber);
-            console.log('room joined: '+roomNumber);
+            sock.join(data.roomNumber);
+            sock.emit('getRoomNumber', data.roomNumber);
+            if(takenRooms.length > 0){
+                for (let i = 0; i < takenRooms.length; i++){
+                    if(takenRooms[i].roomNumber === data.roomNumber){
+                        takenRooms[i].connected.push(data.player);
+                    }
+                }
+            }
+            console.log('room joined: '+data.roomNumber);
+        }
+    });
+
+    sock.on('joined', (data) => {
+        for (let i = 0; i < takenRooms.length; i++){
+            if(takenRooms[i].roomNumber === data.roomNumber){
+                sock.emit("updatePlayers", (takenRooms[i].connected));
+            }
         }
     });
 
     //TODO refactor
     sock.on('disconnect', () =>{
-        console.log(takenRooms);
+        io.emit("userLeft", (sock.id));
         if(takenRooms.length > 0){
             for (let i = 0; i < takenRooms.length; i++){
-                if(!io.sockets.adapter.rooms[takenRooms[i]]){
+                if(!io.sockets.adapter.rooms[takenRooms[i].roomNumber]){
                     rooms.push(takenRooms[i]);
                     console.log('room empty and destroyed: '+takenRooms[i]);
                 }
@@ -60,35 +76,34 @@ io.on('connection', (sock) => {
     });
 
     sock.on('arcadeRendered', (data) =>{
-        console.log(data.roomNumber, data.player);
         io.to(data.roomNumber).emit("spawnPlayer", (data.player));
         sock.emit('startRender');
     });
 
     sock.on('move', (data) =>{
         let arcadeX = data.arcadeX;
-        let x = data.x;
         let arcadeY = data.arcadeY;
-        let y = data.y;
-
-        if(data.direction === "left"){
-            arcadeX += playerSpeed;
-            x -= playerSpeed;
+        let playerX = data.x;
+        let playerY = data.y;
+        if(data.map){
+            if(data.map[37]){
+                arcadeX += playerSpeed;
+                playerX -= playerSpeed;
+            }
+            if(data.map[40]){
+                arcadeY -= playerSpeed;
+                playerY += playerSpeed;
+            }
+            if(data.map[39]){
+                arcadeX -= playerSpeed;
+                playerX += playerSpeed;
+            }
+            if(data.map[38]){
+                arcadeY += playerSpeed;
+                playerY -= playerSpeed;
+            }
         }
-        if(data.direction === "down"){
-            arcadeY -= playerSpeed;
-            y += playerSpeed;
-        }
-        if(data.direction === "right"){
-            arcadeX -= playerSpeed;
-            x += playerSpeed;
-        }
-        if(data.direction === "up"){
-            arcadeY += playerSpeed;
-            y -= playerSpeed;
-        }
-
-        io.to(data.roomNumber).emit("updateLocation", ({x: x, arcadeX: arcadeX, y: y, arcadeY: arcadeY, id: data.id}));
+        io.to(data.roomNumber).emit("updateLocation", ({x: playerX, arcadeX: arcadeX, y: playerY, arcadeY: arcadeY, id: data.id}));
     });
 });
 

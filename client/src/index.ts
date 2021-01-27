@@ -12,6 +12,8 @@ const converter = new Converter();
 
 const playerSpeed = 5;
 
+const refreshRate = 50;
+
 window.addEventListener("keydown", function(e) {
     // space and arrow keys
     if([32, 37, 38, 39, 40].indexOf(e.keyCode) > -1) {
@@ -39,60 +41,103 @@ sock.on('getRoomNumber', (roomNumber: string) => {
     let arcadeRenderer = new Renderer(game.arcade.view , renderLoc);
     arcadeRenderer.render().then(function (){
         sock.emit('arcadeRendered', ({ player: converter.ObjectToJSON(game.clientPlayer), roomNumber: game.arcade.roomNumber }));
+        sock.emit('joined', ({ player: converter.ObjectToJSON(game.clientPlayer), roomNumber: game.arcade.roomNumber }));
     });
 });
 
-sock.on('spawnPlayer', (JSONPlayer: string) => {
-    enableMovement();
+sock.on('spawnPlayer', (JSONPlayer: { id: number ; username: string; x: number; y: number; }) => {
     let player = converter.JSONtoObject(JSONPlayer);
     game.arcade.addPlayer(player);
-    console.log(game.arcade.allPlayers);
     (<HTMLDivElement>document.getElementById('roomNumber')).innerText = game.arcade.roomNumber;
     player.spawnPlayer((<HTMLDivElement>document.getElementById('arcade')));
+    enableMovement();
 });
 
 sock.on('startRender', () => {
     renderAll();
 });
 
+sock.on('userLeft', (socketId: number) => {
+    game.arcade.allPlayers.forEach(player =>{
+        if(player.socket.id === socketId){
+            game.arcade.removePlayer(player.id);
+        }
+    });
+});
+
+sock.on('updatePlayers', (connected: any) => {
+    let allPlayers = game.arcade.allPlayers;
+    connected.forEach((playerConnected: { id: number ; username: string; x: number; y: number; }) => {
+        if(!game.arcade.allPlayers.has(playerConnected.id)){
+            let newPlayer = converter.JSONtoObject(playerConnected);
+            console.log(newPlayer);
+            game.arcade.addPlayer(newPlayer);
+            newPlayer.spawnPlayer((<HTMLDivElement>document.getElementById('arcade')));
+        }
+    });
+});
+
 function renderAll(){
     game.arcade.moveView();
+    game.arcade.centerForClient(game.clientPlayer);
     game.arcade.allPlayers.forEach(player => player.renderPlayer());
     setTimeout(function (){
         renderAll();
-    }, 100);
+    }, refreshRate);
 }
 
 function enableMovement(){
-    let map: Map<number, boolean> = new Map<number, boolean>();
+    let map = {
+        37: false,
+        38: false,
+        39: false,
+        40: false
+    };
+    let clientPlayer = game.arcade.getPlayer(game.clientPlayer.id);
 
-    onkeydown = onkeyup = function(e: KeyboardEvent){
+    function sendMap() {
+        sock.emit('move', ({ x: clientPlayer.x, y: clientPlayer.y, arcadeX: game.arcade.x, arcadeY: game.arcade.y, roomNumber: game.arcade.roomNumber, map: map, id: clientPlayer.id }));
+        setTimeout(sendMap, refreshRate);
+    }
+
+    sendMap();
+
+    onkeydown = function(e: KeyboardEvent){
         //e = e || event; // to deal with IE
-        map.set(e.keyCode, e.type == 'keydown');
-        let allPlayers = game.arcade.allPlayers;
-        let clientPlayer = allPlayers[findIndexById(game.clientPlayer.id, allPlayers)];
-        //left
-        if(map.get(37)) {
-            sock.emit('move', ({ x: game.clientPlayer.x, y: game.clientPlayer.y, arcadeX: game.arcade.x, arcadeY: game.arcade.y, roomNumber: game.arcade.roomNumber, direction: "left" }));
+        if(e.keyCode === 37){
+            map[37] = true;
         }
-        //down
-        if(map.get(40)) {
-            sock.emit('move', ({ x: game.clientPlayer.x, y: game.clientPlayer.y, arcadeX: game.arcade.x, arcadeY: game.arcade.y, roomNumber: game.arcade.roomNumber, direction: "down" }));
+        if(e.keyCode === 38){
+            map[38] = true;
         }
-        //right
-        if(map.get(39)) {
-            sock.emit('move', ({ x: game.clientPlayer.x, y: game.clientPlayer.y, arcadeX: game.arcade.x, arcadeY: game.arcade.y, roomNumber: game.arcade.roomNumber, direction: "right" }));
+        if(e.keyCode === 39){
+            map[39] = true;
         }
-        //up
-        if(map.get(38)) {
-            sock.emit('move', ({ x: game.clientPlayer.x, y: game.clientPlayer.y, arcadeX: game.arcade.x, arcadeY: game.arcade.y, roomNumber: game.arcade.roomNumber, direction: "up" }));
+        if(e.keyCode === 40){
+            map[40] = true;
+        }
+
+    }
+
+    onkeyup = function(e: KeyboardEvent){
+        //e = e || event; // to deal with IE
+        if(e.keyCode === 37){
+            map[37] = false;
+        }
+        if(e.keyCode === 38){
+            map[38] = false;
+        }
+        if(e.keyCode === 39){
+            map[39] = false;
+        }
+        if(e.keyCode === 40){
+            map[40] = false;
         }
     }
 }
 
 sock.on('updateLocation', (data: any) => {
-    let allPlayers = game.arcade.allPlayers;
-    let player = allPlayers[findIndexById(data.id, allPlayers)];
+    let player = game.arcade.getPlayer(data.id);
     player.x = data.x;
     player.y = data.y;
     if(data.id === game.clientPlayer.id){

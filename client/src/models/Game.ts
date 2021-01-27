@@ -1,9 +1,11 @@
 import {Menu} from "./Menu";
 import {Arcade} from "./Arcade";
 import {Player} from "./Player";
+import {Converter} from "./converter/converter";
 
 export class Game{
 
+    private _converter = new Converter();
     private readonly _menu: Menu;
     private _arcade: Arcade | undefined;
     private readonly _clientPlayer: Player;
@@ -30,11 +32,11 @@ export class Game{
     }
 
     public createRoom(): void{
-        this._clientPlayer.socket.emit('createRoom');
+        this._clientPlayer.socket.emit('createRoom', (this._converter.ObjectToJSON(this._clientPlayer)));
     }
 
     public joinRoom(roomNumber: string): void{
-        this._clientPlayer.socket.emit('joinRoom', roomNumber);
+        this._clientPlayer.socket.emit('joinRoom', {player: this._converter.ObjectToJSON(this._clientPlayer), roomNumber: roomNumber});
         this._arcade = new Arcade(roomNumber.toString());
     }
 

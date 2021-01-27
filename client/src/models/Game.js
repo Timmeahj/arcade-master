@@ -1,8 +1,10 @@
 import { Menu } from "./Menu";
 import { Arcade } from "./Arcade";
 import { Player } from "./Player";
+import { Converter } from "./converter/converter";
 export class Game {
     constructor() {
+        this._converter = new Converter();
         this._menu = new Menu();
         this._clientPlayer = new Player(Game.randomUsername(), true, 0, 0, Date.now());
     }
@@ -19,10 +21,10 @@ export class Game {
         return this._clientPlayer;
     }
     createRoom() {
-        this._clientPlayer.socket.emit('createRoom');
+        this._clientPlayer.socket.emit('createRoom', (this._converter.ObjectToJSON(this._clientPlayer)));
     }
     joinRoom(roomNumber) {
-        this._clientPlayer.socket.emit('joinRoom', roomNumber);
+        this._clientPlayer.socket.emit('joinRoom', { player: this._converter.ObjectToJSON(this._clientPlayer), roomNumber: roomNumber });
         this._arcade = new Arcade(roomNumber.toString());
     }
     static randomUsername() {

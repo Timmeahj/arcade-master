@@ -6,14 +6,13 @@ export class Converter {
 
     }
 
-    public JSONtoObject(json: string): Player{
-        const player = JSON.parse(json);
-        return new Player(player.username, false, player.x, player.y, player.id);
+    public JSONtoObject(json: { id: number; username: string; x: number; y: number }): Player{
+        return new Player(json.username, false, json.x, json.y, json.id);
     }
 
-    public ObjectToJSON(player: Player): string{
+    public ObjectToJSON(player: Player): { x: number; y: number; id: number; username: string }{
         const {username, x, y, id} = player;
-        return JSON.stringify({username,x,y,id});
+        return {username,x,y,id};
     }
 
 }

@@ -15,8 +15,8 @@ export class Player{
         this._character.style.width = this._w+"px";
         this._character.style.height = this._h+"px";
         if(clientPlayer){
-            this._x = (window.innerWidth/2)-(this._w/2);
-            this._y = (window.innerHeight/2)-(this._h/2);
+            this._x = 0;//(window.innerWidth/2)-(this._w/2)
+            this._y = 0;//(window.innerHeight/2)-(this._h/2)
         } else{
             this._x = x;
             this._y = y;
@@ -28,6 +28,10 @@ export class Player{
 
     spawnPlayer(location: HTMLElement){
         location.appendChild(this._character);
+    }
+
+    leave(){
+        this._character.remove();
     }
 
     renderPlayer(){
@@ -69,6 +73,22 @@ export class Player{
 
     get y(){
         return this._y;
+    }
+
+    set w(w: number){
+        this._w = w;
+    }
+
+    get w(){
+        return this._w;
+    }
+
+    set h(h: number){
+        this._h = h;
+    }
+
+    get h(){
+        return this._h;
     }
 }
 

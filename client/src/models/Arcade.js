@@ -1,6 +1,6 @@
 export class Arcade {
     constructor(roomNumber) {
-        this._allPlayers = [];
+        this._allPlayers = new Map();
         this._x = 0;
         this._y = 0;
         this._view = 'arcade.html';
@@ -15,11 +15,21 @@ export class Arcade {
     get allPlayers() {
         return this._allPlayers;
     }
-    addPlayer(player) {
-        this._allPlayers.push(player);
+    getPlayer(id) {
+        if (!this._allPlayers.has(id)) {
+            throw new Error("Player not found and can't be removed");
+        }
+        return this._allPlayers.get(id);
     }
-    removePlayer(player) {
-        this._allPlayers = this._allPlayers.filter(e => e !== player);
+    addPlayer(player) {
+        this._allPlayers.set(player.id, player);
+    }
+    removePlayer(id) {
+        if (!this._allPlayers.has(id)) {
+            throw new Error("Player not found and can't be removed");
+        }
+        this._allPlayers.get(id).leave();
+        this._allPlayers.delete(id);
     }
     set x(x) {
         this._x = x;
@@ -36,5 +46,19 @@ export class Arcade {
     moveView() {
         document.getElementById('arcade').style.left = this._x + "px";
         document.getElementById('arcade').style.top = this._y + "px";
+    }
+    centerForClient(player) {
+        document.getElementById('arcade').style.marginLeft = (window.innerWidth / 2) - (player.w / 2) + "px";
+        document.getElementById('arcade').style.marginTop = (window.innerHeight / 2) - (player.h / 2) + "px";
+    }
+    findIndexById(id, ar) {
+        let index = -1;
+        for (let i = 0; i < ar.length; i++) {
+            if (ar[i].id === id) {
+                index = i;
+                break;
+            }
+        }
+        return index;
     }
 }

@@ -3,11 +3,10 @@ export class Converter {
     constructor() {
     }
     JSONtoObject(json) {
-        const player = JSON.parse(json);
-        return new Player(player.username, false, player.x, player.y, player.id);
+        return new Player(json.username, false, json.x, json.y, json.id);
     }
     ObjectToJSON(player) {
         const { username, x, y, id } = player;
-        return JSON.stringify({ username, x, y, id });
+        return { username, x, y, id };
     }
 }
