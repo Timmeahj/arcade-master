@@ -81,29 +81,23 @@ io.on('connection', (sock) => {
     });
 
     sock.on('move', (data) =>{
-        let arcadeX = data.arcadeX;
-        let arcadeY = data.arcadeY;
         let playerX = data.x;
         let playerY = data.y;
         if(data.map){
             if(data.map[37]){
-                arcadeX += playerSpeed;
                 playerX -= playerSpeed;
             }
             if(data.map[40]){
-                arcadeY -= playerSpeed;
                 playerY += playerSpeed;
             }
             if(data.map[39]){
-                arcadeX -= playerSpeed;
                 playerX += playerSpeed;
             }
             if(data.map[38]){
-                arcadeY += playerSpeed;
                 playerY -= playerSpeed;
             }
         }
-        io.to(data.roomNumber).emit("updateLocation", ({x: playerX, arcadeX: arcadeX, y: playerY, arcadeY: arcadeY, id: data.id}));
+        io.to(data.roomNumber).emit("updateLocation", ({x: playerX, y: playerY, id: data.id}));
     });
 });
 
@@ -135,5 +129,3 @@ function shuffle(array) {
 
     return array;
 }
-
-

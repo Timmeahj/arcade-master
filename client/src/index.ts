@@ -96,7 +96,7 @@ function enableMovement(){
     let clientPlayer = game.arcade.getPlayer(game.clientPlayer.id);
 
     function sendMap() {
-        sock.emit('move', ({ x: clientPlayer.x, y: clientPlayer.y, arcadeX: game.arcade.x, arcadeY: game.arcade.y, roomNumber: game.arcade.roomNumber, map: map, id: clientPlayer.id }));
+        sock.emit('move', ({ x: clientPlayer.x, y: clientPlayer.y, roomNumber: game.arcade.roomNumber, map: map, id: clientPlayer.id }));
         setTimeout(sendMap, refreshRate);
     }
 
@@ -141,8 +141,8 @@ sock.on('updateLocation', (data: any) => {
     player.x = data.x;
     player.y = data.y;
     if(data.id === game.clientPlayer.id){
-        game.arcade.x = data.arcadeX;
-        game.arcade.y = data.arcadeY;
+        game.arcade.x = -player.x;
+        game.arcade.y = -player.y;
     }
 });
 
